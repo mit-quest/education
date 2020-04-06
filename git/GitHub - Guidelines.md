@@ -19,7 +19,7 @@ We use the following flow for managing shared software stacks that people need t
 *   Create a **BRANCH** for every discrete bug fix or feature addition with a meaningful name such as kyle/fixing-terraform-authentication. 
 *   **COMMIT** your edits to that branch and try to ensure you haven’t broken anything else, continuous integration is not likely to be useful for small projects 
 *   Open a **PULL REQUEST** from Master once a branch has the core functionality committed. Make sure to describe the purpose of the pull request and link any relevant GitHub Issues.
-*   **TAG**appropriate team members and your supervisor as a reviewer
+*   **TAG** appropriate team members and your supervisor as a reviewer
 *   **DISCUSS** and iterate on edits
 *   All reviewers must **APRROVE** the pull request
 *   The creator of the pull request will then **MERGE** and **DELETE** branch
@@ -27,4 +27,3 @@ We use the following flow for managing shared software stacks that people need t
 # Examples
 
 [Pull Request](https://github.com/mit-quest/necstlab-damage-segmentation/pull/40)
-

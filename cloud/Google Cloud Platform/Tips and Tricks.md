@@ -25,7 +25,7 @@
 ### Tips and Tricks
 
 * It is sometimes useful to spin up common configs, for instance:
-  * [Pre-confirgured Tensor VM](https://cloud.google.com/ai-platform/deep-learning-vm/docs/tensorflow_start_instance)
+  * [Pre-configured Tensor VM](https://cloud.google.com/ai-platform/deep-learning-vm/docs/tensorflow_start_instance)
 
 
 ## [GCS Fuse](https://cloud.google.com/storage/docs/gcs-fuse)
@@ -39,4 +39,3 @@
 
 ### Tricks
 * [Medium Blog Tutorial](https://medium.com/@philipplies/transferring-data-from-google-drive-to-google-cloud-storage-using-google-colab-96e088a8c041)
-
