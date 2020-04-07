@@ -1,10 +1,26 @@
 # How to Create a Machine Learning Pipeline through Google Cloud Platform
+## By Julia Wagner, March 31st, 2020
+
 
 This how-to guide will walk through the steps of creating a machine learning pipeline in Google Cloud Platform. It uses [Fashion MNIST](https://www.tensorflow.org/tutorials/keras/classification) as an example for reference when helpful. 
 
+## Contents  
+[Starting with GCP](#starting-with-gcp)  
+[Creating your Bucket](#creating-your-bucket)  
+[Creating your VM Instance](#creating-your-VM-Instance)  
+[Installing Goofys](#installing-goofys)  
+[Mounting the Bucket](#mounting-the-bucket)  
+[Creating the Python Script](#creating-the-python-script)  
+[Adding Tensorboard](#adding-tensorboard)  
+[Running the Model on the Instance](#running-the-model-on-the-instance) 
+[Stopping the Instance and Buckets](#stopping-the-instance-and-buckets)  
+[SSHing from Local Terminal to view localhost](#sshing-from-local-terminal-to-view-localhost)   
+
+
+
 ## Starting with GCP 
 
-The GCP console is at <https://console.cloud.google.com/home/dashboard?project=bridge-urops> for UROPs at the bridge. Your project name may be different, which would replace "bridge-urops" in the link. You will need to sign into your google account in order to use the console. If you don't already have a GCP account linked, you can get a 12 month free trial with $300 in credit [here](https://cloud.google.com/gcp/?utm_source=google&utm_medium=cpc&utm_campaign=na-US-all-en-dr-bkws-all-all-trial-b-dr-1008076&utm_content=text-ad-lpsitelinkPexp1-any-DEV_c-CRE_353294881636-ADGP_Hybrid+%7C+AW+SEM+%7C+BKWS+%7C+US+%7C+en+%7C+BMM+~+UX+Test+~+gcp-KWID_43700044772255389-kwd-20903505266&utm_term=KW_%2Bgcp-ST_%2Bgcp&gclid=Cj0KCQjwsYb0BRCOARIsAHbLPhF0oYTXkMmXk0H980l13ZDyDtZwxZRSwFesl7XpW7fPv5LNLqOy4rwaAsoqEALw_wcB). 
+The GCP console is at <https://console.cloud.google.com> and will forward you to your default project if this is already set. You will need to sign into your google account in order to use the console. If you don't already have a GCP account linked, you can get a 12 month free trial with $300 in credit [here](https://cloud.google.com/gcp/?utm_source=google&utm_medium=cpc&utm_campaign=na-US-all-en-dr-bkws-all-all-trial-b-dr-1008076&utm_content=text-ad-lpsitelinkPexp1-any-DEV_c-CRE_353294881636-ADGP_Hybrid+%7C+AW+SEM+%7C+BKWS+%7C+US+%7C+en+%7C+BMM+~+UX+Test+~+gcp-KWID_43700044772255389-kwd-20903505266&utm_term=KW_%2Bgcp-ST_%2Bgcp&gclid=Cj0KCQjwsYb0BRCOARIsAHbLPhF0oYTXkMmXk0H980l13ZDyDtZwxZRSwFesl7XpW7fPv5LNLqOy4rwaAsoqEALw_wcB). 
 
 While you can do most if not all of what you'd want to do with GCP through the console, they also have a gcloud SDK with setup [here](https://cloud.google.com/sdk/docs/quickstarts). This tutorial will explain things through the console, but you can also set up your bucket, VM, and other aspects of the pipeline through the command line using gcloud commands. The commands can also be used to interact with the buckets and instances in many ways once set up.
 
@@ -41,7 +57,12 @@ and seeing whether it throws an error. While pip3 will check if the requirement 
 
 For ML pipelines with smaller datasets, such as Fashion MNIST, mounting the bucket isn't strictly necessary. With these, loading and outputting all data using GCP storage is fine. However, many pipelines involve much larger datasets and output needs. Mounting a bucket with cloud storage space to the instance is a way around storage limitations when using larger datasets. Storage is not used up on the instance, but processes on the VM still see the bucket as a part of the file system.
 
-One possible mounting system to use to mount the object storage bucket on our VM instance is [Goofys](https://github.com/kahing/goofys). 
+One possible mounting system to use to mount the object storage bucket on our VM instance is [Goofys](https://github.com/kahing/goofys). To install Goofys and mount the bucket manually, follow this guide. Alternatively, you can use the script [here](../scripts/mount_bucket_goofys.sh) which installs Goofys with its dependencies and mounts your bucket at the given argument. See the beginning of the [Mounting the Bucket](#mounting-the-bucket)
+section below to gain the access key and secret that you'll need to put in your script. Then you can run it with 
+
+```./mount_bucket_goofys.sh [BUCKET] [MOUNT_DIR]```
+
+from the directory where you'll hold your bucket and the Goofys installation. If you don't want to use the script, continue on here. 
 
 Since the VM uses linux, you can install via the pre-built binaries or build the Go code after getting it from github. To install via binaries, run 
 
@@ -153,7 +174,7 @@ This stores logs in a log_dir directory, which can be inside of your bucket. You
 
 ```tensorboard --logdir LOG_DIR```
 
-To access the localhost of the VM, the easiest way is by adding flags and SSHing from your local terminal. See the section on SSHing below for specific steps. 
+To access the localhost of the VM, the easiest way is by adding flags and SSHing from your local terminal. See the [section on SSHing](#sshing-from-local-terminal-to-view-localhost) below for specific steps. 
 
 ## Running the Model on the Instance
 
@@ -198,4 +219,10 @@ To also forward data sent to a port on the VM (for Tensorboard this is port 6006
 
 Now, when you run the Tensorboard command mentioned earlier localhost:6006 will have your analysis. It forwards anything on data sent to port 6006 on the VM (client machine) to port 6006 on your local machine.
 
+With all of this, you should be good to go with creating your ML pipeline on GCP! 
 
+[Back to Top](#How-to-Create-a-Machine-Learning-Pipeline-through-Google-Cloud-Platform)
+
+<br>  
+
+[Back to GCP](README.md)
