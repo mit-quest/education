@@ -14,7 +14,7 @@ This how-to guide will walk through the steps of creating a machine learning pip
 [Adding Tensorboard](#adding-tensorboard)  
 [Running the Model on the Instance](#running-the-model-on-the-instance) 
 [Stopping the Instance and Buckets](#stopping-the-instance-and-buckets)  
-[SSHing from Local Terminal to view localhost](#sshing-from-local-terminal-to-view-localhost)   
+[SSHing from Local Terminal to View localhost](#sshing-from-local-terminal-to-view-localhost)   
 
 
 
@@ -200,7 +200,7 @@ Screen will run the model in the background in a separate terminal on the instan
 
 When you aren’t using the VM instance, you should stop it from the compute engine section on the console. This enables you to keep your setup without incurring fees. Leaving things in the bucket is relatively cheap, so it’s not a problem to leave your data in these. 
 
-## SSHing from Local Terminal to view localhost
+## SSHing from Local Terminal to View localhost
 First, make sure you have SSH keys set up on your local environment (a general guide is [here](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys--2)). 
 
 You can then find the external IP address for your instance on the instances page in the fourth column and copy it to your clipboard. 
