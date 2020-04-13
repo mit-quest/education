@@ -40,13 +40,13 @@ in order to give rwx access to the user and no permissions to all others.
 ## Setting up Your Environment
 In other cloud platforms, you may need to create a specific VM instance to work on. On Satori as mentioned, [opening up a terminal](https://mit-satori.github.io/satori-ssh.html?highlight=ssh) at **Clusters -> Satori Shell Access** accesses a terminal that runs on the login node. To reach the login node, you also can use SSH and run 
 
-`ssh your_username@satori-login-001.mit.edu`
+`ssh <your_username>@satori-login-001.mit.edu`
 
 with port forwarding options described at the end of this guide. If you want to use flags you may be familiar with for the ssh command, you'll need to avoid accessig through the browser.
 
 From here you can run terminal commands that do not involve computation. For computation, you can submit a batch job or start an interactive session in order to transfer to a compute node, explained in later sections.
 
-First, you'll need to make sure you have the modules that contain the necessary software. This is explained in detail [here](https://mit-satori.github.io/satori-getting-started.html#setting-up-your-environment). As of the writing of this guide, the default modules (`anaconda3/2019.10`, `cuda/10.2`, and `wmlce/1.7.0` specifically) cover most of prerequisites needed for many ML projects, this one included. 
+First, you'll need to make sure you have the modules that contain the necessary software. This is explained in detail [here](https://mit-satori.github.io/satori-getting-started.html#setting-up-your-environment). As of the writing of this guide, the default modules (`wmlce/1.7.0` specifically) cover most of prerequisites needed for many ML projects, this one included. The manual approach is [here](https://mit-satori.github.io/satori-ai-frameworks.html#install-anaconda).
 
 If you'd like to install your dependencies in a virtual environment (details [here](https://mit-satori.github.io/satori-ai-frameworks.html#wmlce-creating-and-activate-conda-environments-recommended)), the default modules give you the software to do so. Run
 
@@ -55,7 +55,19 @@ If you'd like to install your dependencies in a virtual environment (details [he
 
 Then, you'll be in your virtual environment. If you receive an error that your shell has not been properly configured, run the command given as 
 
-`conda init bash`
+`conda init bash` (which sometimes works)
+
+or 
+
+`source $/home/softwarre/wmlce/1.7.0/etc/profile.d/conda.sh`
+
+which will access the main initialization file on Satori if you used the module approach. 
+
+Due to the nature of virtual environments which do not access default modules, you should use 
+
+`module load wmlce/1.6.2` 
+
+before or after (module uplaods are persistent to the session) in order to use Tensorflow. We install wmlce/1.6.2 instead of wmlce/1.7.0 because the latter had a CUDA driver version incompatibility at the writing of this guide when used in virtual environmnents. Module loads do not stay in your virtual environment between console sessions, so if you want to manually install dependencies so they are persistent, consider [this approach](https://mit-satori.github.io/satori-ai-frameworks.html?highlight=ptile#wmlce-setting-up-the-software-repository).
 
 After these steps, you can deactivate the environment with 
 
@@ -75,7 +87,7 @@ and can store each with different dependencies. After you activate an environmen
 
 ## Running an Interactive Job
 
-The [steps above](#setting-up-your-environment) can be completed on a login node or compute node. To go much further, though, whether it be testing or running a python script, you need to set up for computational work, original documents [here](https://mit-satori.github.io/satori-workload-manager.html#). Overall, since Satori is a shared resource, you must request time and be entered in a queue to receive computation power.
+The [steps above](#setting-up-your-environment) can be completed on either a login node or compute node. To go much further, though, whether it be testing or running a python script, you need to set up for computational work, original documents [here](https://mit-satori.github.io/satori-workload-manager.html#). Overall, since Satori is a shared resource, you must request time and be entered in a queue to receive computation power.
 
 To launch an interactive shell where you have terminal access (similar to a VM), you can request an interactive batch job from within your browser or ssh terminal with 
 
@@ -85,9 +97,11 @@ This asks for an AC922 node with 4 GPUs from the normal queue for 3 hours. Note 
 
 `bsub -W 3:00 -x -q normalx -gpu "num=4:mode=exclusive_process" -Is /bin/bash`
 
-instead. After (usually) a few minutes of wait time, you have shell access to your compute node and can run things as usual. If using a virtual environment, you'll need to re-activate it. Again, an interactive job is helpful for when you need to be able to interact with the code over time rather than leaving it as a background script (testing, debugging, etc.). You can check on your running jobs on the portal at **Jobs -> Active Jobs**. 
+instead. After (usually) a few minutes of wait time, you have shell access to your compute node and can run things as usual. If using a virtual environment, you must run this command outside of the virtual environment in order to be able to deactivate it when on the compute node. Equivalently, do not activate your environment until you're on the compute node.
 
-Here, you can check to make sure your dependencies are working. As a brief tensorflow check, you can run the below in Python. 
+Again, an interactive job is helpful for when you need to be able to interact with the code over time rather than leaving it as a background script (testing, debugging, etc.). You can check on or delete your running jobs on the portal at **Jobs -> Active Jobs**. 
+
+Here, you can check to make sure your dependencies are working. As a brief tensorflow check, you can run the below in Python 3. 
 
 ```
 from __future__ import print_function
@@ -171,19 +185,27 @@ A lightweight example is below:
 #BSUB -gpu "num=4"
 #BSUB -q "normal"
 
-HOME=/home/jnwagner/
+CONDA_ROOT=/home/software/wmlce/1.6.2/
+PYTHON_VIRTUAL_ENVIRONMENT=my_env
+source ${CONDA_ROOT}/etc/profile.d/conda.sh
+conda activate $PYTHON_VIRTUAL_ENVIRONMENT
+module load wmlce/1.6.2
 
-cd $HOME/project
-python3 classification.py 
+cd /home/<username>/<project_dir>
+python3 my_model.py
 ```
 
-The first few lines identify the shell, job name, job output file, and job errorr file. The "_o" and "_e" are necessary to be identified by the Satori processes, but other aspects of the name can be changed. These will be stored in whatever directory you call the script from with the job id concatanated to the file name. The output file additionally contains some general statistics regarding your job. 
+The first few lines identify the shell, job name, job output file, and job errorr file. The "_o" (output) and "_e" (error) are necessary to be identified by the Satori processes, but other aspects of the name can be changed. These will be stored in whatever directory you call the script from with the job id concatanated to the file name. The output file additionally contains some general statistics regarding your job. 
 
 The `-n` argument specifies the number of GPUs needed and must be a multiple of 4. It is submitted to the normal queue.
 
-After saving this as `myjob.lsf`, send it to the Satori queue with 
+The `CONDA_ROOT` directory given is where modules store the `conda` initialization script. We `source` this file on the compute node (equivalent to our `conda init` earlier, although `conda init` sometimes needs a restart so we avoid it here). If you installed dependencies manually as on the WMLCE page, check out how to access them in a batch script [here](https://mit-satori.github.io/satori-ai-frameworks.html?highlight=ptile#wmlce-testing-ml-dl-frameworks-pytorch-tensorflow-etc-installation). 
 
-`bsup < myjob.lsf`
+It then activates the virtual environment and loads the necessary module as gone over earlier. The script finally `cd`s to the project directory and runs the model. 
+
+After saving this or a similar script as `myjob.lsf`, send it to the Satori queue with 
+
+`bsub < myjob.lsf`
 
 To check on the job once sent, go to the portal at **Jobs -> Active Jobs**. Batch jobs will have the name given to them in the script, rather than just `bash` as for interactive jobs. 
 
@@ -191,7 +213,7 @@ It's also helpful to keep watch over error outputs. For this, you can use the fo
 
 `tail -f my-job-name_e.id`
 
-This will print out any changes to the end of the file as the job progresses. You can get out of this mode with `Ctrl-C`. 
+This will print out any changes to the end of the file as the job progresses. You can get out of this mode with `Ctrl-C`. Make sure it looks clean and that the script is working!
 
 There are many more possibilities with what to include in Batch Scripts, tailored to what you want your program to run in the background of your other tasks. Some examples are [here]((https://mit-satori.github.io/satori-workload-manager.html#batch-scripts)). This now gives you the capability to run multiple programs at a time, akin to using `screen` on a VM. 
 
@@ -201,13 +223,13 @@ First, make sure you have SSH keys set up on your local environment (a general g
 
 As mentioned, [ssh](https://mit-satori.github.io/satori-ssh.html?highlight=ssh#ssh-login) with 
 
-`ssh your_username@satori-login-001.mit.edu`
+`ssh <your_username>@satori-login-001.mit.edu`
 
 It will ask for your password which should be the same as your kerberos password. 
 
 To also forward data sent to a port on the node (for Tensorboard this is port 6006), you can run it with the -L flag as so 
 
-```ssh -L 6006:localhost:6006 your_username@satori-login-001.mit.edu```
+```ssh -L 6006:localhost:6006 <your_username>@satori-login-001.mit.edu```
 
 Now, when you run the Tensorboard command mentioned earlier localhost:6006 will have your analysis. It forwards anything on data sent to port 6006 on the Satori node to port 6006 on your local machine. Run Tensorboard on the login node (not in an interactive job), as this is where your port forwarding connects to. 
 

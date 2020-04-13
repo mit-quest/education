@@ -7,6 +7,8 @@ Satori is a compute cluster meant for very computation intensive projects. Thus,
 
 In Satori, there is also no concept of buckets or VM instances. All users files are stored on a shared filesystem, which you can access through a file browser or ssh. To do non-computational tasks, you run commands on a login node. For anything more, you can request an interactive job to access a shell on a compute node or submit a batch script to run background compute tasks.
 
+If you run out of storage space in your home directory, you can write to Satori admin and ask that it be expanded.
+
 <br>
 
 [Back to Cloud](../README.md)

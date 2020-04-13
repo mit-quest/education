@@ -27,7 +27,7 @@ fi
 
 # install goofys & dependencies
 sudo apt install fuse
-wget https://github.com/kahing/goofys/releases/latest/download/goofys
+wget https://github.com/kahing/goofys/releases/latest/download/goofys --max-redirect=10 --trust-server-names
 chmod 755 goofys
 
 # create credentials file
