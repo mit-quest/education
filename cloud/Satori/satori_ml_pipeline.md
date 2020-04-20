@@ -18,15 +18,15 @@ This how-to guide will walk through the steps of creating a machine learning pip
 
 ## Starting with Satori
 
-The Satori portal login is at <https://satori-portal.mit.edu>. It requires MIT Kerberos credntials to sign in, so it's currently not open to the larger community. It is free with kerberos credentials. The overall wiki with all things Satori can be found [here](https://satori-portal.mit.edu), and you should check out the code of conduct [here](https://mit-satori.github.io/ause-coc.html?highlight=resource).
+The Satori portal login is at <https://satori-portal.mit.edu>. It requires MIT Kerberos credntials to sign in, so it's currently not open to the larger community. It is free with kerberos credentials. The overall wiki with all things Satori can be found [here](https://mit-satori.github.io/), and you should check out the code of conduct [here](https://mit-satori.github.io/ause-coc.html?highlight=resource).
 
-Satori, in comparison to other cloud providers, is a compute cluster meant for very computation intensive projects. Thus, projects with little CPU usage should not go down this route. It is also important to note that resources on Satori are shared with all other users. *This means that projects may have to sit in a queue before use and can be cut off due to time constraints*. In the future, it is moving toward the [Slurm Workload Manager](https://slurm.schedmd.com/overview.html) to allocate resource access.
+Satori, in comparison to other cloud providers, is a compute cluster meant for very computation intensive projects (see Satori basics [here](https://mit-satori.github.io/satori-basics.html#satori-basics)). It is for GPU heavy computation, and each node has four GPUs. Thus, projects with little CPU usage should not go down this route. It is also important to note that resources on Satori are shared with all other users. *This means that projects may have to sit in a queue before use and can be cut off due to time constraints*. In the future, it is moving toward the [Slurm Workload Manager](https://slurm.schedmd.com/overview.html) to allocate resource access.
 
-Additionally, it is different from providers like GCP in that there is not a notion of "creating an instance" or "creating a bucket." This also means that there is no necessary deleting of buckets or stopping of instances. The data you put in Satori folders is stored on a filesystem along with all other users' data, so you don't need to mount anything. Set your permissions accordingly! When you initially start up a shell in Satori, you are connecting to a "login node". You *cannot* run computation here, as the memory allocation bounds are extremely limited. To do so, you'll need to submit an interactive job or batch script to gain a finite amount of time on a "compute node" where you can better utilize resources. This time is assigned after potential wait in a queue. There is more detail on changing node types below in [Runnning an Interactive Job](#running-an-interactive-job).
+Additionally, it is different from providers like GCP in that there is not a notion of "creating an instance" or "creating a bucket." This also means that there is no necessary deleting of buckets or stopping of instances. The data you put in Satori folders is stored on a filesystem along with all other users' data, so you don't need to mount anything. Set your permissions accordingly! When you initially start up a shell in Satori, you are connecting to a "login node". You *cannot* run computation here, as the memory allocation bounds are extremely limited. To do so, you'll need to submit an interactive job or batch script to gain a finite amount of time on a "compute node" where you can better utilize resources. This time is assigned after a potential wait in a queue. There is more detail on changing node types below in [Runnning an Interactive Job](#running-an-interactive-job).
 
 After you log in with your kerberos at the [portal](https://satori-portal.mit.edu) and "Authenticate with Globus" (select Massachusetts Institute of Technology), you're ready to get started. You can do most of what you'd want to do on Satori through this portal (access a terminal, monitor jobs, browse/transfer files), but you can also SSH Login into the Satori cluster as detailed [here](https://mit-satori.github.io/satori-ssh.html#ssh-login). A general guide for setting up SSH keys, in case your's are not yet set up, is [here](https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys--2). This tutorial will mostly explain things through the portal where possible.
 
-To create the ML pipeline, you'll specifically interact with the **Files**, **Jobs**, and **Clusters** sections on drop down navigation menu in the portal. There are fewer snazzy options on Satori than on cloud platforms like GCP, as it is mainly meant for high GPU usage. 
+To create the ML pipeline, you'll specifically interact with the **Files**, **Jobs**, and **Clusters** sections on the drop down navigation menu in the portal. There are fewer snazzy options on Satori than on cloud platforms like GCP, as it is mainly meant for high GPU usage. 
 
 ## Creating your Directories
 Start by going to **Files->Home Directory** in the [Satori Portal](https://satori-portal.mit.edu) and clicking “New Dir”. You can give this folder the name of your project, and then click on the folder to create both an output and input directory within it. You can now use the upload button to add whatever files (training and testing images and labels) you'll need. Depending on your machine learning script, you could also download data at runtime like in the Fashion MNIST Tutorial. 
@@ -42,7 +42,7 @@ In other cloud platforms, you may need to create a specific VM instance to work 
 
 `ssh <your_username>@satori-login-001.mit.edu`
 
-with port forwarding options described at the end of this guide. If you want to use flags you may be familiar with for the ssh command, you'll need to avoid accessig through the browser.
+with port forwarding options described at the end of this guide. If you want to use flags you may be familiar with for the ssh command, you'll need to avoid accessing through the browser.
 
 From here you can run terminal commands that do not involve computation. For computation, you can submit a batch job or start an interactive session in order to transfer to a compute node, explained in later sections.
 
@@ -51,6 +51,7 @@ First, you'll need to make sure you have the modules that contain the necessary 
 If you'd like to install your dependencies in a virtual environment (details [here](https://mit-satori.github.io/satori-ai-frameworks.html#wmlce-creating-and-activate-conda-environments-recommended)), the default modules give you the software to do so. Run
 
 `conda create --name my_env python=3.7`
+
 `conda activate my_env`
 
 Then, you'll be in your virtual environment. If you receive an error that your shell has not been properly configured, run the command given as 
@@ -67,7 +68,7 @@ Due to the nature of virtual environments which do not access default modules, y
 
 `module load wmlce/1.6.2` 
 
-before or after (module uplaods are persistent to the session) in order to use Tensorflow. We install wmlce/1.6.2 instead of wmlce/1.7.0 because the latter had a CUDA driver version incompatibility at the writing of this guide when used in virtual environmnents. Module loads do not stay in your virtual environment between console sessions, so if you want to manually install dependencies so they are persistent, consider [this approach](https://mit-satori.github.io/satori-ai-frameworks.html?highlight=ptile#wmlce-setting-up-the-software-repository).
+before or after (module uplaods are persistent to the session) in order to use Tensorflow. We install wmlce/1.6.2 instead of wmlce/1.7.0 because the latter had a CUDA driver version incompatibility as of the writing of this guide when used in virtual environmnents. Module loads do not stay in your virtual environment between console sessions, so if you want to manually install dependencies so they are persistent, consider [this approach](https://mit-satori.github.io/satori-ai-frameworks.html?highlight=ptile#install-anaconda).
 
 After these steps, you can deactivate the environment with 
 
@@ -97,11 +98,11 @@ This asks for an AC922 node with 4 GPUs from the normal queue for 3 hours. Note 
 
 `bsub -W 3:00 -x -q normalx -gpu "num=4:mode=exclusive_process" -Is /bin/bash`
 
-instead. After (usually) a few minutes of wait time, you have shell access to your compute node and can run things as usual. If using a virtual environment, you must run this command outside of the virtual environment in order to be able to deactivate it when on the compute node. Equivalently, do not activate your environment until you're on the compute node.
+instead. After (usually) a few minutes of wait time, you have shell access to your compute node and can run things as normal. If using a virtual environment, you must run this command outside of the virtual environment in order to be able to deactivate it when on the compute node. Equivalently, do not activate your environment until you're on the compute node.
 
 Again, an interactive job is helpful for when you need to be able to interact with the code over time rather than leaving it as a background script (testing, debugging, etc.). You can check on or delete your running jobs on the portal at **Jobs -> Active Jobs**. 
 
-Here, you can check to make sure your dependencies are working. As a brief tensorflow check, you can run the below in Python 3. 
+Now, you can check to make sure your dependencies are working. As a brief tensorflow check, you can run the below in Python 3. 
 
 ```
 from __future__ import print_function
@@ -124,7 +125,7 @@ This makes sure that tensorflow is installed and can allocate memory (running th
 
 For a thorough explanation and tutorial on creating a python script for machine learning, see the Fashion MNIST Tutorial [here](https://www.tensorflow.org/tutorials/keras/classification). 
 
-Here are a few changes of note when working on a VM rather than locally. 
+Here are a few changes of note when working through Satori rather than locally. 
 
 You can access data (for reading and writing) through the filepath as you would on a local machine in your machine learning script. The Fashion MNIST Tutorial downloads its data at the beginning of its process.
  
@@ -153,15 +154,15 @@ To access the localhost of the node, the easiest way is by adding flags and SSHi
 
 Before going to a batch script, you should start up an [Interactive Job](#running-an-interactive-job) and confirm that there are no errors. 
 
-If your file is not on the instance, there are a few ways to upload it. The easiest and most similar to previous steps is by going to the Satori Dashboard, choosing you folder through **Files -> Home Directory**, and uploading your file in the same way that you uploaded data to folders earlier. Additionally, you can use `scp` (steps [here](https://mit-satori.github.io/satori-getting-started.html?highlight=scp#using-scp-or-rysnc)), requires SSH key setup below). 
+If your file is not on the instance, there are a few ways to upload it. The easiest and most similar to previous steps is by going to the Satori Dashboard, choosing you folder through **Files -> Home Directory**, and uploading your file in the same way that you uploaded data to folders earlier. Additionally, you can use `scp` (steps [here](https://mit-satori.github.io/satori-getting-started.html?highlight=scp#using-scp-or-rysnc), requires SSH key setup below). 
 
-You can now run the script from within the browser or add in your own SSH keys to run it from your own ssh terminal. Assuming your script is in python and you have accesss to the  command line through the browser or ssh, navigate to the folder. To check and see whether your script is set up correctly, set loops and equivalent structures to a low iteration count just to make sure it can read and output files correctly. All file paths must be accurate from the directory in which you ran the script, if relative. Thus, it's easier to use absolute file paths. You can always run `pwd` to print out the path of the current directory in order to figure out the absolute path. When this version is ready, run
+You can now run the script from within the browser or add SSH keys to run it from your own ssh terminal. Assuming your script is in python and you have accesss to the  command line through the browser or ssh, navigate to the project folder. To check and see whether your script is set up correctly, set loops and equivalent structures to a low iteration count just to make sure it can read and output files correctly. All file paths must be accurate from the directory in which you ran the script, if relative. Thus, it's easier to use absolute file paths. You can always run `pwd` to print out the path of the current directory in order to figure out the absolute path. When this version is ready, run
 
 ```python3 my_model.py```
 
 Confirm that there are no import errors, errors with regards to reading or writing to files, or other issues with the skeleton of the script. If using Tensorboard, now is also a good time to check an initial log on localhost to make sure things are being stored correctly. 
 
-When everything looks good, you should be able to continue on to the model run without constantly watching or interacting through a batch script. 
+When everything looks good, you should be able to continue on to the model run through a batch script without constantly watching or interacting. 
 
 ### Notes
 
@@ -201,7 +202,7 @@ The `-n` argument specifies the number of GPUs needed and must be a multiple of 
 
 The `CONDA_ROOT` directory given is where modules store the `conda` initialization script. We `source` this file on the compute node (equivalent to our `conda init` earlier, although `conda init` sometimes needs a restart so we avoid it here). If you installed dependencies manually as on the WMLCE page, check out how to access them in a batch script [here](https://mit-satori.github.io/satori-ai-frameworks.html?highlight=ptile#wmlce-testing-ml-dl-frameworks-pytorch-tensorflow-etc-installation). 
 
-It then activates the virtual environment and loads the necessary module as gone over earlier. The script finally `cd`s to the project directory and runs the model. 
+It then activates the virtual environment (otherwise we could use module wmlce/1.7.0) and loads the necessary module as gone over earlier. The script finally `cd`s to the project directory and runs the model. 
 
 After saving this or a similar script as `myjob.lsf`, send it to the Satori queue with 
 
@@ -231,7 +232,7 @@ To also forward data sent to a port on the node (for Tensorboard this is port 60
 
 ```ssh -L 6006:localhost:6006 <your_username>@satori-login-001.mit.edu```
 
-Now, when you run the Tensorboard command mentioned earlier localhost:6006 will have your analysis. It forwards anything on data sent to port 6006 on the Satori node to port 6006 on your local machine. Run Tensorboard on the login node (not in an interactive job), as this is where your port forwarding connects to. 
+Now, when you run the Tensorboard command mentioned earlier, localhost:6006 will have your analysis. It forwards anything on data sent to port 6006 on the Satori node to port 6006 on your local machine. Run Tensorboard on the login node (not in an interactive job), as this is where your port forwarding connects to. 
 
 With all of this, you should be good to go with creating your ML pipeline on Satori! 
 
