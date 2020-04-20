@@ -1,5 +1,7 @@
 This directory serves as a starting point with information to help you process machine learning tasks on different popular cloud providers. Below are the current directories.
 
+### Contents 
+
 [Google Cloud Platform](GCP)  
 [Satori](Satori)  
 
